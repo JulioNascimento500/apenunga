@@ -64,7 +64,7 @@ if __name__ == "__main__":
             w=np.asfortranarray(w)
             v=np.asfortranarray(v)
 
-        magnons.magnons_function(2*M*ML,Egrid,Qgrid,2*np.pi*qpts/(np.array([a,b,c])),v,v,w,plotValues,Emin, Emax,a,T)
+        magnons.magnons_function(2*M*ML,Egrid,Qgrid,2*np.pi*qpts/(np.array([a,b,c])),v,v,w,plotValues,0.0, 0.5,a,T)
 
         plotValues=abs(plotValues)
 
