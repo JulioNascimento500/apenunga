@@ -395,10 +395,6 @@ class Input:
   #@profile
   def Hamiltonian(self,step_size=0.01,hermitian=True):
 
-    #def get_zcomponent(Input,atom):
-    #    return np.complex128(Input.aseatoms.get_initial_magnetic_moments()[atom,0]*np.cos(Input.aseatoms.get_initial_magnetic_moments()[atom,1]))
-    
-
     Lists_of_Neigbours=self.get_Neigb(step_size)
 
     LayersDictionary={}
@@ -431,7 +427,6 @@ class Input:
     b=self.aseatoms.cell[1,1]
     c=self.aseatoms.cell[2,2]
 
-    #print(LayersDictionary)
 
     self.orientationEach = np.array([LayersDictionary[i][j] for i in LayersDictionary.keys() for j,value in enumerate(LayersDictionary[i])])
 
@@ -445,7 +440,6 @@ class Input:
     for key in LayersDictionary.keys():
         M_types.append([np.where((self.Total_types==item).all(axis=1))[0][0] for item in LayersDictionary[key]])
 
-    #print(M_types)
 
     N_list=[self.N_dict[key] for key in self.N_dict.keys()]
 
@@ -457,81 +451,11 @@ class Input:
 
     list_Distances=np.array(list(set(list_Distances)))
 
-    print(list_Distances)
-    print(len(list_Distances))
     M=len(self.Total_types)
-
-    #print(self.M_list)
-    #print(N_list)
 
     self.M_list=list(np.array(self.M_list))
 
-    # z=np.zeros([sum(self.M_list),sum(self.M_list),self.NumNei])
-    # JMatrixValue=np.zeros([sum(self.M_list),sum(self.M_list),self.NumNei])
-    # Gamma=np.zeros([sum(self.M_list),sum(self.M_list),self.NumNei,len(self.qpts)],dtype=complex)
-
-    ML=len(self.M_list)#+sum(N_list)
-
-    z=np.zeros([M,M,ML,ML,self.NumNei],dtype=complex)
-    Gamma=np.zeros([M,M,ML,ML,self.NumNei,len(self.qpts)],dtype=complex)
-    FzzM=np.zeros([M,M,ML,ML,self.NumNei],dtype=complex)
-    G1M=np.zeros([M,M,ML,ML,self.NumNei],dtype=complex)
-    G2M=np.zeros([M,M,ML,ML,self.NumNei],dtype=complex)
-    JMatrixValue=np.zeros([M,M,ML,ML,self.NumNei],dtype=complex)
-    S=np.zeros([np.sum(self.M_list)],dtype=complex)
-
-    q = np.copy(self.qpts)
-    q[:,2]=0
-    for num,j in enumerate(Lists_of_Neigbours):
-        #print(j)
-        for i in j:
-            
-            DistanceInd=np.where(list_Distances==round(get_distance(self,i),5))[0][0]
-            
-            #print(DistanceInd)
-            ## Layer of atoms 
-            Layer1=np.where((self.zNum==float(self.atoms[i[0],-1])))[0][0]
-            Layer2=np.where((self.zNum==float(self.atoms[i[1],-1])))[0][0]
-
-# 
-  
-            r=np.where((self.Total_types==self.aseatoms.get_initial_magnetic_moments()[i[0]]).all(axis=1))[0][0]
-            s=np.where((self.Total_types==self.aseatoms.get_initial_magnetic_moments()[i[1]]).all(axis=1))[0][0]
-
-            print(i,r,s,round(get_distance(self,i),5))
-            #r=np.where((LayersDictionary[Layer1]==self.aseatoms.get_initial_magnetic_moments()[i[0]]).all(axis=1))[0][0]
-            #s=np.where((LayersDictionary[Layer2]==self.aseatoms.get_initial_magnetic_moments()[i[1]]).all(axis=1))[0][0]
-
-            #print(r,s,Layer1,Layer2,num)
-            #print((np.exp(-1.0j*np.dot(get_distance_vector(Input,i),np.transpose(2*np.pi*Input.qpts/np.array([a/supercell,a/supercell,a]))))))
-            
-            z[r,s,Layer1,Layer2,num]+=1*(self.M_list[Layer1]/N_list[Layer1])
-
-
-
-            Gamma[r,s,Layer1,Layer2,num,:]+=(np.exp(-1.0j*np.dot(get_distance_vector(self,i),np.transpose(2*np.pi*(q/np.array([a,a,a]))))))*(self.M_list[Layer1]/N_list[Layer1])
-            
-            
-            FzzM[r,s,Layer1,Layer2,num]=Fzz(self,i[0],i[1])
-            G1M[r,s,Layer1,Layer2,num]=G1(self,i[0],i[1])
-            G2M[r,s,Layer1,Layer2,num]=G2(self,i[0],i[1])
-            
-            if self.masterflag.lower()=='true':
-                JMatrixValue[r,s,Layer2,num]=self.Js[0,0,DistanceInd]
-            else:
-                JMatrixValue[r,s,Layer1,Layer2,num]=self.Js[r,s,DistanceInd]
-            #S[(self.M_list[Layer1]*Layer1)+r]=self.aseatoms.get_initial_magnetic_moments()[i[0],0]
-        S=self.aseatoms.get_initial_magnetic_moments()[:,0]
-    for i in self.JMatrix_overide:
-        #print(i)
-        ## Layer of atoms 
-        Layer1=np.where((self.zNum==float(self.atoms[int(i[0])-1,-1])))[0][0]
-        Layer2=np.where((self.zNum==float(self.atoms[int(i[1])-1,-1])))[0][0]
-
-        r=np.where((self.Total_types==self.aseatoms.get_initial_magnetic_moments()[int(i[0])-1]).all(axis=1))[0][0]
-        s=np.where((self.Total_types==self.aseatoms.get_initial_magnetic_moments()[int(i[1])-1]).all(axis=1))[0][0]
-        
-        JMatrixValue[r,s,Layer1,Layer2,:len(i[2:])]=i[2:]
+    ML=len(self.M_list)
 
     H_main=np.zeros([sum(self.M_list),sum(self.M_list),len(self.qpts)],dtype=complex)
     H_main1=np.zeros([sum(self.M_list),sum(self.M_list),len(self.qpts)],dtype=complex)
@@ -539,59 +463,88 @@ class Input:
     H_off2=np.zeros([sum(self.M_list),sum(self.M_list),len(self.qpts)],dtype=complex)
     H_final=np.zeros([2*sum(self.M_list),2*sum(self.M_list),len(self.qpts)],dtype=complex)
 
+
+    q = np.copy(self.qpts)
+    q[:,2]=0
+
     nw_length=[len(term) for term in M_types]
 
-    for u in range(self.NumNei):
-        for i in range(ML):
-            for j in range(ML):
-                Mi=M_types[i]
-                Mj=M_types[j]
-                for rn,r in enumerate(Mi):
-                    for sn,s in enumerate(Mj):
-                        #print('r,s,i,j,u',rn,sn,i,j,u)
-                        #print('Mi,Mj',Mi,Mj)
+    S=self.aseatoms.get_initial_magnetic_moments()[:,0]
 
-                        ##oldways
-                        # (len(Mj)*j)
-                    
-                        sumnw_length_i=sum(nw_length[:i])
-                        sumnw_length_j=sum(nw_length[:j])
+    for num,j in enumerate(Lists_of_Neigbours):
+        #print(j)
+        for i in j:
+            
+            DistanceInd=np.where(list_Distances==round(get_distance(self,i),5))[0][0]
+            
+            ## Layer of atoms 
+            Layer1=np.where((self.zNum==float(self.atoms[i[0],-1])))[0][0]
+            Layer2=np.where((self.zNum==float(self.atoms[i[1],-1])))[0][0]
 
-                        Sr=(S[(sumnw_length_i)+rn])
-                        Ss=(S[(sumnw_length_j)+sn])
-                        ######################
-                        H_main[(sumnw_length_i)+rn,(sumnw_length_i)+rn,:]+=z[r,s,i,j,u]*JMatrixValue[r,s,i,j,u]*(Sr)*FzzM[r,s,i,j,u]
+  
+            r=np.where((self.Total_types==self.aseatoms.get_initial_magnetic_moments()[i[0]]).all(axis=1))[0][0]
+            s=np.where((self.Total_types==self.aseatoms.get_initial_magnetic_moments()[i[1]]).all(axis=1))[0][0]
 
-                        H_main[(sumnw_length_j)+sn,(sumnw_length_j)+sn,:]+=z[r,s,i,j,u]*JMatrixValue[r,s,i,j,u]*(Ss)*FzzM[r,s,i,j,u]                            
+            #print(i,r,s,round(get_distance(self,i),5))
+            
+            if self.masterflag.lower()=='true':
+                JMatrixValue=self.Js[0,0,DistanceInd]
+            else:
+                JMatrixValue=self.Js[r,s,DistanceInd]
+
+            sumnw_length_i=sum(nw_length[:Layer1])
+            sumnw_length_j=sum(nw_length[:Layer2])
+
+            Mi=M_types[Layer1]
+            Mj=M_types[Layer2]
+
+            rn=Mi.index(r)
+            sn=Mj.index(s)
+
+            Sr=(S[(sumnw_length_i)+rn])
+            Ss=(S[(sumnw_length_j)+sn])
+
+            ######################
+            z=1*(self.M_list[Layer1]/N_list[Layer1])
+            Gamma=(np.exp(-1.0j*np.dot(get_distance_vector(self,i),np.transpose(2*np.pi*(q/np.array([a,a,a]))))))*(self.M_list[Layer1]/N_list[Layer1])
+            FzzM=Fzz(self,i[0],i[1])
+            G1M=G1(self,i[0],i[1])
+            G2M=G2(self,i[0],i[1])
 
 
-                        H_main[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue[r,s,i,j,u]*    \
-                        + (((np.sqrt((Sr*Ss))/2)*(Gamma[r,s,i,j,u,:]*G1M[r,s,i,j,u]))  \
-                        +  ((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma[r,s,i,j,u,:])*np.conj(G1M[r,s,i,j,u]))))
-                        
-                        
-                        ################################
-                        H_main1[(sumnw_length_i)+rn,(sumnw_length_i)+rn,:]+=z[r,s,i,j,u]*JMatrixValue[r,s,i,j,u]*(Sr)*FzzM[r,s,i,j,u]
 
-                        H_main1[(sumnw_length_j)+sn,(sumnw_length_j)+sn,:]+=z[r,s,i,j,u]*JMatrixValue[r,s,i,j,u]*(Ss)*FzzM[r,s,i,j,u]                            
+            H_main[(sumnw_length_i)+rn,(sumnw_length_i)+rn,:]+=z*JMatrixValue*(Sr)*FzzM
+
+            H_main[(sumnw_length_j)+sn,(sumnw_length_j)+sn,:]+=z*JMatrixValue*(Ss)*FzzM                       
 
 
-                        H_main1[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue[r,s,i,j,u]*    \
-                        + (((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma[r,s,i,j,u,:])*np.conj(G1M[r,s,i,j,u])))  \
-                        +  ((np.sqrt((Sr*Ss))/2)*(Gamma[r,s,i,j,u,:]*G1M[r,s,i,j,u])))
+            H_main[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue*    \
+            + (((np.sqrt((Sr*Ss))/2)*(Gamma*G1M))  \
+            +  ((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma)*np.conj(G1M))))
 
-                        
-                        #################################
-                        H_off1[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue[r,s,i,j,u]*    \
-                        + (((np.sqrt((Sr*Ss))/2)*(Gamma[r,s,i,j,u,:]*np.conj(G2M[r,s,i,j,u])))  \
-                        +  ((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma[r,s,i,j,u,:])*G2M[r,s,i,j,u]))) 
+            ################################
+            H_main1[(sumnw_length_i)+rn,(sumnw_length_i)+rn,:]+=z*JMatrixValue*(Sr)*FzzM
 
-                        
-                        ################################
-                        H_off2[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue[r,s,i,j,u]*    \
-                        + (((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma[r,s,i,j,u,:])*G2M[r,s,i,j,u]))  \
-                        +  ((np.sqrt((Sr*Ss))/2)*(Gamma[r,s,i,j,u,:]*np.conj(G2M[r,s,i,j,u])))) 
-                    
+            H_main1[(sumnw_length_j)+sn,(sumnw_length_j)+sn,:]+=z*JMatrixValue*(Ss)*FzzM                           
+
+
+            H_main1[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue*    \
+            + (((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma)*np.conj(G1M)))  \
+            +  ((np.sqrt((Sr*Ss))/2)*(Gamma*G1M)))
+
+            
+            #################################
+            H_off1[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue*    \
+            + (((np.sqrt((Sr*Ss))/2)*(Gamma*np.conj(G2M)))  \
+            +  ((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma)*G2M))) 
+
+            
+            ################################
+            H_off2[(sumnw_length_i)+rn,(sumnw_length_j)+sn,:]-=JMatrixValue*    \
+            + (((np.sqrt((Sr*Ss))/2)*(np.conj(Gamma)*G2M))  \
+            +  ((np.sqrt((Sr*Ss))/2)*(Gamma*np.conj(G2M)))) 
+        
+                                  
                 
     if hermitian:
         for i in range(len(self.qpts)):
@@ -604,26 +557,8 @@ class Input:
             
     H_final=H_final/4
     
-    # eVals_full=np.array([])
-    # eVecs_fullL=np.array([])
-    # eVecs_fullR=np.array([])
 
-    # for i in range(len(self.qpts)):
-    #     eVals,eVecsL,eVecsR = eig(H_final[:,:,i], left=True, right=True)
-    #     idx = eVals.argsort()[::1] 
-    #     eVals = eVals[idx]
-    #     eVecsL = eVecsL[:,idx]
-    #     eVecsR = eVecsR[:,idx]
-    #     if i==0:
-    #         eVals_full=eVals
-    #         eVecs_fullL=eVecsL
-    #         eVecs_fullR=eVecsR
-    #     else:
-    #         eVals_full=np.vstack((eVals_full,eVals))#np.append(eVals_full,eVals)
-    #         eVecs_fullL=np.dstack((eVecs_fullL,eVecsL))
-    #         eVecs_fullR=np.dstack((eVecs_fullR,eVecsR))
-
-    return H_final#,JMatrixValue,z,Gamma,JMatrixValue,FzzM,G1M,G2M,S
+    return H_final
 
 
   def HamiltonianK(self,step_size=0.01,hermitian=True):
